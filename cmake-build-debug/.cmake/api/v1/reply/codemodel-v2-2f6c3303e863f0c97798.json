@@ -1,0 +1,69 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"jsonFile" : "directory-.-Debug-d0094a50bb2071803777.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.29"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "expression",
+					"targetIndexes" : 
+					[
+						0,
+						1
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "check::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-check-Debug-e4e4a3574beb761bb4c4.json",
+					"name" : "check",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "expression::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-expression-Debug-84468993ba173d6a23c9.json",
+					"name" : "expression",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "D:/\u041a\u0438\u0440\u0438\u043b\u043b/Desktop/\u0412\u0428\u042d \u0434\u0437/\u0410\u0438\u0410\u042f/exprssion/cmake-build-debug",
+		"source" : "D:/\u041a\u0438\u0440\u0438\u043b\u043b/Desktop/\u0412\u0428\u042d \u0434\u0437/\u0410\u0438\u0410\u042f/exprssion"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 7
+	}
+}
