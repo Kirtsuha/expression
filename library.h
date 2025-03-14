@@ -63,28 +63,58 @@ public:
 };
 
 template <typename T>
+class Expression;
+
+/*template <typename U>
+Expression<U> sin(const Expression<U>& that);
+template <typename U>
+Expression<U> cos(const Expression<U>& that);
+template <typename U>
+Expression<U> ln(const Expression<U>& that);
+template <typename U>
+Expression<U> exp(const Expression<U>& that);*/
+
+
+template <typename T>
 class Expression {
 private:
     explicit Expression(std::shared_ptr<Node<T>> impl);
     std::shared_ptr<Node<T>> impl_;
 public:
     explicit Expression(std::string variable);
+    explicit Expression(T value);
 
-    friend Expression operator""_val(T value);
-    friend Expression operator""_var(const char* variable);
-    //friend Expression operator""_var(const char* variable, size_t size);
+    ~Expression() = default;
+    Expression(const Expression& other) = default;
+    Expression(Expression&& other) = default;
+    Expression& operator=(const Expression& other) = default;
+    Expression& operator=(Expression&& other) = default;
 
-    Expression operator+ (const Expression& that);
-    Expression operator- (const Expression& that);
-    Expression operator* (const Expression& that);
-    Expression operator/ (const Expression& that);
-    Expression operator^ (const Expression& that);
+    T eval(std::map<std::string,T> context);
+    std::string to_string();
 
-    Expression operator+=(const Expression& that);
-    Expression operator-=(const Expression& that);
-    Expression operator*=(const Expression& that);
-    Expression operator/=(const Expression& that);
-    Expression operator^=(const Expression& that);
+    friend Expression operator+<> (const Expression<T>& lhs, const Expression<T>& rhs);
+    friend Expression operator-<> (const Expression<T>& lhs, const Expression<T>& rhs);
+    friend Expression operator*<> (const Expression<T>& lhs, const Expression<T>& rhs);
+    friend Expression operator/<> (const Expression<T>& lhs, const Expression<T>& rhs);
+    friend Expression operator^<> (const Expression<T>& lhs, const Expression<T>& rhs);
+
+    friend Expression<T> sin<>(const Expression<T>& that);
+    /*friend Expression<T> cos<>(const Expression<T>& that);
+    friend Expression<T> ln<>(const Expression<T>& that);
+    friend Expression<T> exp<>(const Expression<T>& that);
+    /*Expression operator+=(const Expression<T>& that);
+    Expression operator-=(const Expression<T>& that);
+    Expression operator*=(const Expression<T>& that);
+    Expression operator/=(const Expression<T>& that);
+    Expression operator^=(const Expression<T>& that);*/
 };
 
+//template <typename T>
+//Expression<T> operator""_val(T value);
+
+
+
+
 #endif //EXPRSSION_LIBRARY_H
+

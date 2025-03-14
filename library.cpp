@@ -3,6 +3,8 @@
 #include <iostream>
 #include <string>
 #include <cmath>
+#include <string>
+#include <memory>
 
 template <typename T>
 Value<T>::Value(T val) : value(val) {}
@@ -81,32 +83,78 @@ std::string UnaryOperation<T>::to_string() {
 template<typename T>
 T UnaryOperation<T>::eval(std::map<std::string, T> context) {
     T a = value->eval(context);
-    switch (op) {
-        case "sin" : sin(a);
-        case "cos" : cos(a);
-        case "log" : log(a);
-        case "exp" : exp(a);
-        default : throw std::runtime_error("Unknown function: " + op);
-    }
+    if (op == "sin") return std::sin(a);
+    if (op == "cos") return std::cos(a);
+    if (op == "log") return std::log(a);
+    if (op == "exp") return std::exp(a);
+    throw std::runtime_error("Unknown function: " + op);
 }
 
 template<typename T>
 Expression<T>::Expression(std::shared_ptr<Node<T>> impl) : impl_(impl) {}
 
 template<typename T>
-Expression<T>::Expression(std::string variable) : impl_(Node<T>(variable)) {}
+Expression<T>::Expression(std::string variable) : impl_(std::make_shared<Variable<T>>(variable)) {}
+
+template<typename T>
+Expression<T>::Expression(T value) : impl_(std::make_shared<Value<T>>(value)) {}
 
 
+template<typename T>
+T Expression<T>::eval(std::map<std::string, T> context) {
+    return impl_->eval(context);
+}
+
+template<typename T>
+std::string Expression<T>::to_string() {
+    return impl_->to_string();
+}
+
+template<typename T>
+Expression<T> operator+(const Expression<T>& lhs, const Expression<T>& rhs) {
+    return Expression<T>(std::make_shared<BinaryOperation<T>>(lhs.impl_, rhs.impl_, '+'));
+}
+
+template<typename T>
+Expression<T> operator-(const Expression<T>& lhs, const Expression<T>& rhs) {
+    return Expression<T>(std::make_shared<BinaryOperation<T>>(lhs.impl_, rhs.impl_, '-'));
+}
+
+template<typename T>
+Expression<T> operator*(const Expression<T>& lhs, const Expression<T>& rhs) {
+    return Expression<T>(std::make_shared<BinaryOperation<T>>(lhs.impl_, rhs.impl_, '*'));
+}
+
+template<typename T>
+Expression<T> operator/(const Expression<T>& lhs, const Expression<T>& rhs) {
+    return Expression<T>(std::make_shared<BinaryOperation<T>>(lhs.impl_, rhs.impl_, '/'));
+}
+
+template<typename T>
+Expression<T> operator^(const Expression<T>& lhs, const Expression<T>& rhs) {
+    return Expression<T>(std::make_shared<BinaryOperation<T>>(lhs.impl_, rhs.impl_, '^'));
+}
+
+template<typename T>
+Expression<T> sin(const Expression<T>& that) {
+    return Expression<T>(std::make_shared<UnaryOperation<T>>(that.impl_, "sin"));
+}
 
 int main() {
-    auto left = Value<double>(123);
+    /*auto left = Value<double>(123);
     auto right = Variable<double>("lambda");
     auto op = BinaryOperation<double>(std::shared_ptr<Node<double> >(&left), std::shared_ptr<Node<double> >(&right), '^');
 
     std::cout << op.to_string() << std::endl;
-    std::map<std::string, double> context = {{"lambda", 2.0}};
-    std::cout << op.eval(context);
+    std::map<std::string, double> context = {{"lambda", 3.0}};
+    std::cout << op.eval(context) << std::endl;*/
+
+    Expression<double> left_expr(59.0);
+    Expression<double> right_expr("phi");
+    Expression<double> op_expr = sin(left_expr + sin(right_expr) * left_expr) - (right_expr ^ left_expr) / right_expr;
+    Expression<double> new_expr = std::move(op_expr);
+    std::cout << new_expr.to_string() << std::endl;
+
     return 0;
 }
-
 
