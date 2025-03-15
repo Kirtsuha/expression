@@ -1,4 +1,0 @@
-D:/Кирилл/Desktop/ВШЭ дз/АиАЯ/exprssion/cmake-build-debug/CMakeFiles/expression.dir
-D:/Кирилл/Desktop/ВШЭ дз/АиАЯ/exprssion/cmake-build-debug/CMakeFiles/check.dir
-D:/Кирилл/Desktop/ВШЭ дз/АиАЯ/exprssion/cmake-build-debug/CMakeFiles/edit_cache.dir
-D:/Кирилл/Desktop/ВШЭ дз/АиАЯ/exprssion/cmake-build-debug/CMakeFiles/rebuild_cache.dir
