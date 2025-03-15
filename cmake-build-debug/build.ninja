@@ -90,6 +90,12 @@ build CMakeFiles/check.dir/library.cpp.obj: CXX_COMPILER__check_unscanned_Debug 
   OBJECT_DIR = CMakeFiles\check.dir
   OBJECT_FILE_DIR = CMakeFiles\check.dir
 
+build CMakeFiles/check.dir/test.cpp.obj: CXX_COMPILER__check_unscanned_Debug D$:/Кирилл/Desktop/ВШЭ$ дз/АиАЯ/exprssion/test.cpp || cmake_object_order_depends_target_check
+  DEP_FILE = CMakeFiles\check.dir\test.cpp.obj.d
+  FLAGS = -g -std=gnu++20 -fdiagnostics-color=always
+  OBJECT_DIR = CMakeFiles\check.dir
+  OBJECT_FILE_DIR = CMakeFiles\check.dir
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target check
@@ -98,7 +104,7 @@ build CMakeFiles/check.dir/library.cpp.obj: CXX_COMPILER__check_unscanned_Debug 
 #############################################
 # Link the executable check.exe
 
-build check.exe: CXX_EXECUTABLE_LINKER__check_Debug CMakeFiles/check.dir/library.cpp.obj
+build check.exe: CXX_EXECUTABLE_LINKER__check_Debug CMakeFiles/check.dir/library.cpp.obj CMakeFiles/check.dir/test.cpp.obj
   FLAGS = -g
   LINK_LIBRARIES = -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles\check.dir

@@ -13,6 +13,8 @@ public:
     virtual ~Node() = default;
     virtual std::string to_string() = 0;
     virtual T eval(std::map<std::string,T> context) = 0;
+    virtual std::shared_ptr<Node<T>> diff(std::string name) = 0;
+    virtual std::shared_ptr<Node<T>> substitute(std::map<std::string,T> context) = 0;
 };
 
 template <typename T>
@@ -24,6 +26,8 @@ public:
     ~Value() override;
     std::string to_string() override;
     T eval(std::map<std::string,T> context) override;
+    std::shared_ptr<Node<T>> diff(std::string name) override;
+    std::shared_ptr<Node<T>> substitute(std::map<std::string,T> context) override;
 };
 
 template <typename T>
@@ -35,6 +39,8 @@ public:
     ~Variable() override;
     std::string to_string() override;
     T eval(std::map<std::string,T> context) override;
+    std::shared_ptr<Node<T>> diff(std::string name) override;
+    std::shared_ptr<Node<T>> substitute(std::map<std::string,T> context) override;
 };
 
 template <typename T>
@@ -48,6 +54,8 @@ public:
     ~BinaryOperation() override;
     std::string to_string() override;
     T eval(std::map<std::string,T> context) override;
+    std::shared_ptr<Node<T>> diff(std::string name) override;
+    std::shared_ptr<Node<T>> substitute(std::map<std::string,T> context) override;
 };
 
 template <typename T>
@@ -60,26 +68,15 @@ public:
     ~UnaryOperation() override;
     std::string to_string() override;
     T eval(std::map<std::string,T> context) override;
+    std::shared_ptr<Node<T>> diff(std::string name) override;
+    std::shared_ptr<Node<T>> substitute(std::map<std::string,T> context) override;
 };
-
-template <typename T>
-class Expression;
-
-/*template <typename U>
-Expression<U> sin(const Expression<U>& that);
-template <typename U>
-Expression<U> cos(const Expression<U>& that);
-template <typename U>
-Expression<U> ln(const Expression<U>& that);
-template <typename U>
-Expression<U> exp(const Expression<U>& that);*/
-
 
 template <typename T>
 class Expression {
 private:
-    explicit Expression(std::shared_ptr<Node<T>> impl);
     std::shared_ptr<Node<T>> impl_;
+    explicit Expression(std::shared_ptr<Node<T>> impl);
 public:
     explicit Expression(std::string variable);
     explicit Expression(T value);
@@ -91,7 +88,10 @@ public:
     Expression& operator=(Expression&& other) = default;
 
     T eval(std::map<std::string,T> context);
+    Expression<T> diff(std::string name);
+    Expression<T> substitute(std::map<std::string,T> context);
     std::string to_string();
+    std::shared_ptr<Node<T>> node();
 
     friend Expression operator+<> (const Expression<T>& lhs, const Expression<T>& rhs);
     friend Expression operator-<> (const Expression<T>& lhs, const Expression<T>& rhs);
@@ -100,7 +100,7 @@ public:
     friend Expression operator^<> (const Expression<T>& lhs, const Expression<T>& rhs);
 
     friend Expression<T> sin<>(const Expression<T>& that);
-    /*friend Expression<T> cos<>(const Expression<T>& that);
+    friend Expression<T> cos<>(const Expression<T>& that);
     friend Expression<T> ln<>(const Expression<T>& that);
     friend Expression<T> exp<>(const Expression<T>& that);
     /*Expression operator+=(const Expression<T>& that);
