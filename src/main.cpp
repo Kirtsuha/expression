@@ -127,15 +127,15 @@ template <typename T>
 Expression<T> rec_lexer_double(std::vector<Token>& input) {
     auto temp = input[input.size() - 1];
     input.pop_back();
-    if (std::is_same_v<T, std::complex<double>>) {
+    if constexpr(std::is_same_v<T, std::complex<double>>) {
         if (temp.ttype == NUMBER) {
             std::complex<double> x(std::stod(temp.value), 0.0);
-            return Expression<std::complex<double>>(x);
+            return Expression<T>(x);
         }
         if (temp.ttype == COMPLEX_NUMBER) {
             temp.value.pop_back();
             std::complex<double> x(0.0, std::stod(temp.value));
-            return Expression<std::complex<double>>(x);
+            return Expression<T>(x);
         }
     } else {
         if (temp.ttype == NUMBER) {
@@ -189,8 +189,6 @@ int main(int argc, char* argv[]) {
     if (mode == "--parse") {
         try {
             std::vector<Token> tokens = tokenizer(expr_str);
-
-            // Вывод токенов
             for (const auto& token : tokens) {
                 std::cout << "Token type: ";
                 switch (token.ttype) {
@@ -238,8 +236,10 @@ int main(int argc, char* argv[]) {
         }
         if (is_complex) {
             auto result = parser<std::complex<double>>(expr_str);
+            std::cout << result.to_string() << std::endl;
         } else {
             auto result = parser<double>(expr_str);
+            std::cout << result.to_string() << std::endl;
         }
     } /*else if (mode == "--diff") {
         std::string var_name = argv[4];
