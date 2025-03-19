@@ -12,7 +12,8 @@ enum TokenType {
     OPERATION,
     FUNCTION,
     LEFT_BRACKET,
-    RIGHT_BRACKET
+    RIGHT_BRACKET,
+    EQUAL
 };
 
 struct Token {
@@ -20,7 +21,7 @@ struct Token {
     std::string value;
 };
 
-std::vector<Token> tokenizer(std::string input) {
+std::vector<Token> tokenizer(std::string input, bool is_eqaul_expected) {
     std::vector<Token> result;
     result.push_back({LEFT_BRACKET, "("});
     for (size_t i = 0; i < input.size(); i++) {
@@ -66,6 +67,13 @@ std::vector<Token> tokenizer(std::string input) {
                 result.push_back({VARIABLE, lambda});
             }
             continue;
+        }
+        if (input[i] == '=') {
+            if (is_eqaul_expected) {
+                result.push_back({EQUAL, "="});
+                continue;
+            }
+            throw std::runtime_error("Equal sign is not accepted");
         }
         throw std::runtime_error("Unknown symbole: " + input[i]);
     }
@@ -172,7 +180,7 @@ Expression<T> rec_lexer_double(std::vector<Token>& input) {
 
 template <typename T>
 Expression<T> parser(std::string input) {
-    auto tokenized = tokenizer(input);
+    auto tokenized = tokenizer(input, false);
     auto sorted = polish_order(tokenized);
     return rec_lexer_double<T>(sorted);
 }
@@ -188,7 +196,7 @@ int main(int argc, char* argv[]) {
 
     if (mode == "--parse") {
         try {
-            std::vector<Token> tokens = tokenizer(expr_str);
+            std::vector<Token> tokens = tokenizer(expr_str, false);
             for (const auto& token : tokens) {
                 std::cout << "Token type: ";
                 switch (token.ttype) {
@@ -213,6 +221,9 @@ int main(int argc, char* argv[]) {
                     case RIGHT_BRACKET:
                         std::cout << "RIGHT_BRACKET";
                         break;
+                    case EQUAL:
+                        std::cout << "EQUAL";
+                        break;
                 }
                 std::cout << ", Value: " << token.value << "\n";
             }
@@ -220,7 +231,7 @@ int main(int argc, char* argv[]) {
             std::cerr << "Error: " << e.what() << "\n";
             return 1;
         }
-        std::vector<Token> tokens = tokenizer(expr_str);
+        std::vector<Token> tokens = tokenizer(expr_str, false);
         std::vector<Token> polish = polish_order(tokens);
         std::cout << "Result ordered in polish notation: ";
         for (size_t i = 0; i < polish.size(); i++) {
@@ -241,12 +252,122 @@ int main(int argc, char* argv[]) {
             auto result = parser<double>(expr_str);
             std::cout << result.to_string() << std::endl;
         }
-    } /*else if (mode == "--diff") {
-        std::string var_name = argv[4];
-        auto expr = parse_expression(expr_str);
-        auto derivative = expr.derivative(var_name);
-        std::cout << derivative.toString() << "\n";
-    } */
+
+
+    } else if (mode == "--eval") {
+        std::cout << "Input expression: " << expr_str << std::endl;
+        bool is_complex = 0;
+        std::vector<std::vector<Token>> tokened_args;
+
+        for (int i = 3; i < argc; i++) {
+            std::vector<Token> temp = tokenizer(argv[i], true);
+
+            if (temp.size() != 5 && temp.size() != 7) {
+                throw std::runtime_error("Wrong args usage: [name]=[number | real_part+imag_part]");
+            }
+            tokened_args.push_back(temp);
+            for (size_t j = 0; j < temp.size(); j++) {
+                if (temp[j].ttype == COMPLEX_NUMBER) {
+                    is_complex = true;
+                }
+            }
+        }
+
+        std::vector<Token> tokens = tokenizer(expr_str, false);
+        std::vector<Token> polish = polish_order(tokens);
+
+        if (is_complex) {
+            std::map<std::string,std::complex<double>> context;
+            for (size_t i = 0; i < tokened_args.size(); i++) {
+                auto temp = tokened_args[i];
+                
+                for (size_t j = 0; j < temp.size(); j++) {
+                    if (temp.size() == 5 && 
+                    temp[0].ttype == LEFT_BRACKET &&
+                    temp[1].ttype == VARIABLE && 
+                    temp[2].ttype == EQUAL && 
+                    temp[3].ttype == NUMBER &&
+                    temp[4].ttype == RIGHT_BRACKET) {
+                        context[temp[1].value] = std::complex<double>(std::stod(temp[3].value), 0.0);
+                    } 
+                    else if (temp.size() == 5 && 
+                    temp[0].ttype == LEFT_BRACKET &&
+                    temp[1].ttype == VARIABLE && 
+                    temp[2].ttype == EQUAL && 
+                    temp[3].ttype == COMPLEX_NUMBER &&
+                    temp[4].ttype == RIGHT_BRACKET) {
+                        context[temp[1].value] = std::complex<double>(0.0, std::stod(temp[3].value));
+                    } 
+                    else if (temp.size() == 7 && 
+                    temp[0].ttype == LEFT_BRACKET &&
+                    temp[1].ttype == VARIABLE && 
+                    temp[2].ttype == EQUAL &&
+                    temp[3].ttype == NUMBER && 
+                    temp[4].value == "+" &&
+                    temp[5].ttype == COMPLEX_NUMBER &&
+                    temp[6].ttype == RIGHT_BRACKET) {
+                        context[temp[1].value] = std::complex<double>(std::stod(temp[3].value), std::stod(temp[5].value));
+                    }
+                    else if (temp.size() == 7 && 
+                    temp[0].ttype == LEFT_BRACKET &&
+                    temp[1].ttype == VARIABLE && 
+                    temp[2].ttype == EQUAL &&
+                    temp[3].ttype == NUMBER && 
+                    temp[4].value == "-" &&
+                    temp[5].ttype == COMPLEX_NUMBER &&
+                    temp[6].ttype == RIGHT_BRACKET) {
+                        context[temp[1].value] = std::complex<double>(std::stod(temp[3].value), -std::stod(temp[5].value));
+                    }
+                    else {
+                        throw std::runtime_error("Wrong for " + temp[1].value +"Args usage: [name]=[number | real_part(+-)imag_part]");
+                    }
+                }
+            }
+            auto ans = parser<std::complex<double>>(expr_str);
+            std::cout << ans.eval(context) << std::endl;
+        } else {
+            std::map<std::string,double> context;
+            for (size_t i = 0; i < tokened_args.size(); i++) {
+                auto temp = tokened_args[i];
+                if (temp.size() == 5 &&
+                temp[0].ttype == LEFT_BRACKET &&
+                temp[1].ttype == VARIABLE &&
+                temp[2].ttype == EQUAL && 
+                temp[3].ttype == NUMBER &&
+                temp[4].ttype == RIGHT_BRACKET) {
+                    context[temp[1].value] = std::stod(temp[3].value);
+                } else {
+                    throw std::runtime_error("Args usage: [name]=[number | real_part+imag_part]");
+                }
+            }
+            auto ans = parser<double>(expr_str);
+            std::cout << ans.eval(context)<< std::endl;
+        }
+        
+    }
+    
+    else if (mode == "--diff") {
+        std::cout << "Input expression: " << expr_str << std::endl;
+        std::vector<Token> tokens = tokenizer(expr_str, false);
+        std::vector<Token> polish = polish_order(tokens);
+        bool is_complex = false;
+        if (argc != 4) {
+            throw std::runtime_error("Args usage: [name]");
+        }
+        std::string name = argv[3];
+        for (size_t i = 0; i < polish.size(); i++) {
+            if (polish[i].ttype == COMPLEX_NUMBER) {
+                is_complex = true;
+            }
+        }
+        if (is_complex) {
+            auto ans = parser<std::complex<double>>(expr_str);
+            std::cout << ans.diff(name).to_string();
+        } else {
+            auto ans = parser<double>(expr_str);
+            std::cout << ans.diff(name).to_string();
+        }
+    }
     else {
         std::cerr << "Unknown mode: " << mode << "\n";
         return 1;

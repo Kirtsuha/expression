@@ -55,6 +55,7 @@ T Variable<T>::eval(std::map<std::string, T> context) {
         return context[name];
     }
     throw std::runtime_error("Variable not found: " + name);
+    return 0;
 }
 
 template<typename T>
