@@ -24,16 +24,19 @@ std::string Value<T>::to_string() {
 
 template<typename T>
 T Value<T>::eval(std::map<std::string, T> context) {
+    (void) context;
     return value;
 }
 
 template<typename T>
 std::shared_ptr<Node<T>> Value<T>::diff(std::string name) {
+    (void) name;
     return std::make_shared<Value<T>>(0.0);
 }
 
 template<typename T>
 std::shared_ptr<Node<T>> Value<T>::substitute(std::map<std::string, T> context) {
+    (void) context;
     return std::make_shared<Value<T>>(value);
 }
 

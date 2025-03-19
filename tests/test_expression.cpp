@@ -22,7 +22,7 @@ void test_variable() {
 void test_binary_operators() {
     Expression<int> a("lambda");
     Expression<int> b(2);
-    Expression<int> res = (a*b) ^ a + (b/b) - a;
+    Expression<int> res = ((a*b) ^ a) + (b/b) - a;
     assert(res.eval({{"lambda",1}}) == 2);
     std::cout << "test_binary_operators: OK" << std::endl;
 }
